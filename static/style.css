@@ -1,0 +1,354 @@
+/* ==========================================================================
+   SCHEMAFLOW: METROPOLIS RETRO MONOCHROME TERMINAL THEME
+   Inspired by Fritz Lang's Metropolis (1927): Industrial geometry, near-black
+   monochrome, phosphor glow, scanline overlays, high contrast & accessibility.
+   ========================================================================== */
+
+:root {
+  --bg-primary: #0a0c10;
+  --bg-secondary: #12151e;
+  --bg-panel: #161a26;
+  --border-color: #2b3347;
+  --border-focus: #58a6ff;
+  --text-main: #e6edf3;
+  --text-muted: #8b949e;
+  --accent-cyan: #79c0ff;
+  --accent-green: #56d364;
+  --accent-amber: #e3b341;
+  --accent-red: #f85149;
+  --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+  --glow-subtle: 0 0 6px rgba(121, 192, 255, 0.25);
+  --scanline-opacity: 0.15;
+}
+
+/* Light Theme support under prefers-color-scheme */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-primary: #f6f8fa;
+    --bg-secondary: #eaeef2;
+    --bg-panel: #ffffff;
+    --border-color: #d0d7de;
+    --border-focus: #0969da;
+    --text-main: #1f2328;
+    --text-muted: #656d76;
+    --accent-cyan: #0969da;
+    --accent-green: #1a7f37;
+    --accent-amber: #9a6700;
+    --accent-red: #cf222e;
+    --glow-subtle: none;
+    --scanline-opacity: 0;
+  }
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-mono);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+/* CRT Scanline Overlay */
+.scanlines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 4px;
+  opacity: var(--scanline-opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanlines {
+    display: none;
+  }
+}
+
+/* Screen-reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.terminal-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: var(--bg-secondary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.logo-text {
+  font-size: 1.4rem;
+  letter-spacing: 2px;
+  color: var(--text-main);
+  text-shadow: var(--glow-subtle);
+}
+
+.logo-text span {
+  color: var(--accent-cyan);
+}
+
+.terminal-badge {
+  font-size: 0.75rem;
+  color: var(--accent-green);
+  margin-right: 12px;
+}
+
+.system-status {
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  color: var(--accent-cyan);
+  letter-spacing: 1px;
+}
+
+/* Tab Navigation */
+.tabs-nav {
+  display: flex;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 16px;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.tab-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-bottom: none;
+  padding: 10px 18px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+  background-color: var(--bg-secondary);
+}
+
+.tab-btn.active {
+  color: var(--accent-cyan);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-bottom: 2px solid var(--bg-panel);
+  font-weight: bold;
+}
+
+.tab-btn:focus-visible,
+.action-btn:focus-visible,
+.terminal-select:focus-visible,
+.terminal-textarea:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+/* Main Workspace */
+.workspace-container {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 16px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .workspace-container {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+}
+
+/* Panels */
+.editor-panel,
+.viewer-panel {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.panel-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
+
+.char-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.terminal-select {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.editor-wrapper {
+  flex: 1;
+  display: flex;
+  min-height: 320px;
+}
+
+.terminal-textarea {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  border: none;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  resize: none;
+  line-height: 1.45;
+}
+
+/* Action Bar */
+.action-bar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  flex: 1;
+  min-width: 100px;
+  padding: 8px 12px;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-btn:hover {
+  background-color: var(--border-color);
+}
+
+.btn-primary {
+  background-color: #1f3347;
+  color: var(--accent-cyan);
+  border-color: #3b5a7a;
+}
+
+.btn-primary:hover {
+  background-color: #2b4763;
+}
+
+/* Viewer */
+.viewer-wrapper {
+  flex: 1;
+  padding: 12px;
+  overflow: auto;
+  background-color: var(--bg-primary);
+}
+
+.terminal-canvas {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.25;
+  white-space: pre;
+  color: var(--text-main);
+  text-shadow: var(--glow-subtle);
+}
+
+.query-wrapper {
+  flex: 1;
+  padding: 16px;
+  overflow: auto;
+  background-color: var(--bg-primary);
+}
+
+.query-placeholder-banner {
+  border: 1px dashed var(--border-color);
+  padding: 24px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.query-placeholder-banner h3 {
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Footer */
+.app-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 600px) {
+  .app-footer {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+}

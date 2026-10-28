@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SchemaFlow - Visual ASCII Relational Learning Engine</title>
+  <meta name="description" content="Offline-capable, screen-reader friendly text-based visual learning platform for MySQL.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="terminal-body">
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <span class="terminal-badge" aria-hidden="true">[ONLINE // OFFLINE READY]</span>
+      <h1 class="logo-text">SCHEMA<span>FLOW</span></h1>
+    </div>
+    <div class="header-right">
+      <span class="system-status" id="system-status" role="status">READY</span>
+    </div>
+  </header>
+
+  <nav class="tabs-nav" role="tablist" aria-label="Diagram and Query Modes">
+    <button class="tab-btn active" id="tab-er" role="tab" aria-selected="true" aria-controls="panel-diagram" data-target="er">
+      [1] ER Diagram
+    </button>
+    <button class="tab-btn" id="tab-uml" role="tab" aria-selected="false" aria-controls="panel-diagram" data-target="uml">
+      [2] UML Classes
+    </button>
+    <button class="tab-btn" id="tab-describe" role="tab" aria-selected="false" aria-controls="panel-diagram" data-target="describe">
+      [3] Screen-Reader English
+    </button>
+    <button class="tab-btn" id="tab-query" role="tab" aria-selected="false" aria-controls="panel-query" data-target="query">
+      [4] Query Visualizer
+    </button>
+  </nav>
+
+  <main class="workspace-container">
+    <!-- Left Panel: SQL Input & Controls -->
+    <section class="editor-panel" aria-label="SQL Schema Input">
+      <div class="panel-header">
+        <label for="sample-select" class="panel-label">SAMPLE SCHEMAS:</label>
+        <select id="sample-select" class="terminal-select" aria-label="Select sample schema">
+          <option value="">-- Choose Public Service Schema --</option>
+        </select>
+      </div>
+
+      <div class="editor-wrapper">
+        <label for="sql-input" class="sr-only">MySQL CREATE TABLE Script</label>
+        <textarea
+          id="sql-input"
+          class="terminal-textarea"
+          spellcheck="false"
+          placeholder="-- Paste MySQL CREATE TABLE / ALTER statements here...&#10;&#10;CREATE TABLE users (&#10;    id INT PRIMARY KEY,&#10;    email VARCHAR(100) UNIQUE&#10;);"></textarea>
+      </div>
+
+      <div class="action-bar">
+        <button id="btn-generate" class="action-btn btn-primary" type="button">
+          ▶ GENERATE
+        </button>
+        <button id="btn-copy" class="action-btn" type="button">
+          📋 COPY
+        </button>
+        <button id="btn-download" class="action-btn" type="button">
+          💾 DOWNLOAD .TXT
+        </button>
+      </div>
+    </section>
+
+    <!-- Right Panel: Diagram / Narrative View -->
+    <section class="viewer-panel" aria-label="Diagram Output Canvas">
+      <div class="panel-header">
+        <span class="panel-label" id="output-mode-title">OUTPUT // ER DIAGRAM</span>
+        <span class="char-count" id="char-count">0 lines</span>
+      </div>
+
+      <div class="viewer-wrapper" id="panel-diagram" role="tabpanel" tabindex="0">
+        <pre id="output-pre" class="terminal-canvas" aria-live="polite" aria-label="ASCII Diagram and Analysis Output">Loading SchemaFlow engine...</pre>
+      </div>
+
+      <!-- Dedicated container for Tab 4 Query Visualizer -->
+      <div class="query-wrapper hidden" id="panel-query" role="tabpanel" tabindex="0" aria-label="Interactive Query Execution Simulator">
+        <div id="query-visualiser-root">
+          <div class="query-placeholder-banner">
+            <h3>Query Visualizer Tab</h3>
+            <p>Interactive step-by-step query pipeline execution on the canonical 8-row emp dataset.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-left">
+      <span>SchemaFlow v1.0 • Metropolis Minimalist Monospace Canvas</span>
+    </div>
+    <div class="footer-right">
+      <span>100% Deterministic • Zero AI/ML • Fully Accessible</span>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
