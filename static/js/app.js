@@ -23,6 +23,8 @@
   const statusIndicatorEl = document.getElementById("system-status");
   const diagramPanelEl = document.getElementById("panel-diagram");
   const queryPanelEl = document.getElementById("panel-query");
+  const workspaceContainerEl = document.querySelector(".workspace-container");
+  const editorPanelEl = document.querySelector(".editor-panel");
   const erStyleToggleEl = document.getElementById("er-style-toggle");
   const styleToggleBtns = document.querySelectorAll(".style-toggle-btn");
 
@@ -86,6 +88,8 @@
 
   async function executeCurrentTab() {
     if (activeTabMode === "query") {
+      if (workspaceContainerEl) workspaceContainerEl.classList.add("mode-query");
+      if (editorPanelEl) editorPanelEl.classList.add("hidden");
       diagramPanelEl.classList.add("hidden");
       queryPanelEl.classList.remove("hidden");
       if (erStyleToggleEl) erStyleToggleEl.style.display = "none";
@@ -98,6 +102,8 @@
       return;
     }
 
+    if (workspaceContainerEl) workspaceContainerEl.classList.remove("mode-query");
+    if (editorPanelEl) editorPanelEl.classList.remove("hidden");
     diagramPanelEl.classList.remove("hidden");
     queryPanelEl.classList.add("hidden");
 

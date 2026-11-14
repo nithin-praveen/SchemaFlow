@@ -90,54 +90,59 @@
 
       <!-- Dedicated container for Tab 4 Query Visualizer -->
       <div class="query-wrapper hidden" id="panel-query" role="tabpanel" tabindex="0" aria-label="Interactive Query Execution Simulator">
-        <div id="query-visualiser-root" class="query-container">
+        <div id="query-visualiser-root" class="query-layout-split">
           
-          <!-- Top: Query Configuration & Input -->
-          <div class="query-control-card">
-            <div class="query-card-header">
-              <label for="query-preset-select" class="panel-label">CANONICAL PRESETS:</label>
+          <!-- LEFT COLUMN: Sticky Query & Control Deck (~380px) -->
+          <aside class="query-sidebar-deck" aria-label="Query and Execution Controls">
+            
+            <!-- Presets & View Dataset -->
+            <div class="deck-section">
+              <div class="deck-header">
+                <label for="query-preset-select" class="panel-label">CANONICAL PRESETS:</label>
+                <button id="btn-toggle-dataset" class="action-btn btn-xs" type="button" title="Inspect the 8-row benchmark dataset">
+                  📋 VIEW 'EMP'
+                </button>
+              </div>
               <select id="query-preset-select" class="terminal-select query-select" aria-label="Select benchmark SELECT query">
                 <option value="">-- Choose SQL Query Preset --</option>
               </select>
-              <button id="btn-toggle-dataset" class="action-btn btn-sm" type="button" title="Inspect the 8-row benchmark dataset">
-                📋 VIEW 'EMP' DATASET
-              </button>
             </div>
-            
-            <div class="query-input-box">
+
+            <!-- SQL Query Textarea (Always Visible!) -->
+            <div class="deck-section">
+              <div class="deck-header">
+                <label for="query-sql-input" class="panel-label">SQL QUERY (EDITABLE):</label>
+                <span id="query-status-badge" class="query-badge" role="status">READY</span>
+              </div>
               <textarea
                 id="query-sql-input"
                 class="terminal-textarea query-sql-textarea"
                 spellcheck="false"
-                rows="2"
+                rows="3"
                 placeholder="-- Enter MySQL SELECT query on 'emp' table...&#10;SELECT dept, COUNT(*) FROM emp WHERE salary >= 45000 GROUP BY dept;"></textarea>
+              <div class="deck-action-row">
+                <button id="btn-run-query" class="action-btn btn-primary btn-sm" type="button">
+                  ▶ RUN SIMULATION
+                </button>
+              </div>
             </div>
 
-            <div class="query-actions-bar">
-              <button id="btn-run-query" class="action-btn btn-primary" type="button">
-                ▶ RUN PIPELINE SIMULATION
-              </button>
-              <span id="query-status-badge" class="query-badge" role="status">READY</span>
-            </div>
-          </div>
-
-          <!-- Dataset viewer panel (toggleable) -->
-          <div id="query-dataset-panel" class="query-dataset-panel hidden">
-            <div class="panel-header">
-              <span class="panel-label">CANONICAL BENCHMARK RELATION: 'EMP' (8 TUPLES)</span>
-              <button id="btn-close-dataset" class="action-btn btn-xs" type="button">✖ CLOSE</button>
-            </div>
-            <pre id="query-dataset-pre" class="terminal-canvas dataset-canvas"></pre>
-          </div>
-
-          <!-- Stepper Navigation Bar & Flow Track -->
-          <div id="query-stepper-container" class="query-stepper-container hidden">
-            <div class="stepper-header">
-              <div class="stepper-title-group">
-                <span class="stepper-label">PHYSICAL PIPELINE FLOW</span>
+            <!-- Active SQL Clause Highlighter -->
+            <div class="deck-section" id="query-clause-highlighter-card">
+              <div class="deck-header">
+                <span class="panel-label">ACTIVE CLAUSE TRACE:</span>
                 <span id="query-active-clause-badge" class="clause-pill">ACTIVE: FROM</span>
               </div>
-              <div class="playback-controls">
+              <div id="query-highlighted-sql" class="highlighted-sql-body"></div>
+            </div>
+
+            <!-- Playback Controls Pinned with the Query -->
+            <div class="deck-section playback-deck-section">
+              <div class="deck-header">
+                <span class="panel-label">STEP CONTROLS:</span>
+                <span id="query-step-number-badge" class="stage-pill">STEP 1 OF 6</span>
+              </div>
+              <div class="playback-controls-row">
                 <button id="btn-step-prev" class="action-btn btn-sm" type="button" title="Previous physical execution step">
                   ◀ PREV
                 </button>
@@ -150,48 +155,14 @@
               </div>
             </div>
 
-            <!-- SQL Query Token Highlighter (shows what is executing) -->
-            <div class="query-clause-highlighter" id="query-clause-highlighter" aria-label="Original query with active clause highlighted">
-              <span class="highlighter-label">QUERY EXECUTION TRACE:</span>
-              <div id="query-highlighted-sql" class="highlighted-sql-body"></div>
-            </div>
-
-            <!-- Flow Track (Visual Roadmap with arrows) -->
-            <div class="flow-track-wrapper">
-              <div id="query-flow-track" class="query-flow-track" role="tablist" aria-label="Physical Pipeline Flow">
-                <!-- Dynamically populated connected flow nodes (FROM -> WHERE -> GROUP BY -> ...) -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Step Display Stage -->
-          <div id="query-stage-card" class="query-stage-card hidden">
-            <div class="stage-header">
-              <div class="stage-title-wrap">
-                <span id="query-step-number-badge" class="stage-pill">STEP 1 OF 6</span>
-                <h3 id="query-step-title" class="stage-title">Step 1: FROM emp</h3>
-              </div>
-              <div class="stage-controls-right">
-                <span id="query-step-metrics" class="metrics-pill">8 tuples in pipeline</span>
-                <div class="view-mode-toggle" role="group" aria-label="View format">
-                  <button type="button" class="view-toggle-btn active" id="btn-view-graphic" title="Visual Cards & Buckets View">
-                    🎨 Visual Flow
-                  </button>
-                  <button type="button" class="view-toggle-btn" id="btn-view-ascii" title="Raw Monospace Table View">
-                    ▦ ASCII Table
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Reality Check: Written Order vs Engine Order -->
+            <!-- Reality Check: Written Order vs Physical Order -->
             <div class="order-contrast-banner" id="order-contrast-banner">
               <span class="contrast-icon">⚡</span>
-              <span id="query-written-vs-phys" class="contrast-text">Written in SQL at position #2 ──► Executes FIRST under the hood</span>
+              <span id="query-written-vs-phys" class="contrast-text">Written in SQL at position #2 ──► Executes FIRST</span>
             </div>
 
-            <!-- Dual Simple Explanations (What is happening + Under the hood secret) -->
-            <div class="dual-insights-grid">
+            <!-- Dual Simple Insights (What is happening & Under the hood secret) -->
+            <div class="deck-insights">
               <div class="insight-card what-card">
                 <div class="insight-header">
                   <span class="insight-icon">🎯</span>
@@ -209,16 +180,54 @@
               </div>
             </div>
 
-            <!-- Visual Flow Graphic Container (Buckets, Cards, Stamped Partitions) -->
-            <div id="query-visual-canvas" class="query-visual-canvas" aria-label="Visual Interactive Pipeline Stage">
-              <!-- Dynamically populated visual buckets/cards -->
+          </aside>
+
+          <!-- RIGHT COLUMN: The Visual Stage (Takes remaining width, scrollable) -->
+          <main class="query-main-stage" id="query-stage-card" aria-label="Visual Execution Canvas">
+            
+            <!-- Sticky Top Bar inside stage: Title, Metrics, View Toggle & Flow Roadmap -->
+            <div class="stage-sticky-nav">
+              <div class="stage-nav-top">
+                <div class="stage-title-wrap">
+                  <h3 id="query-step-title" class="stage-title">Step 1: FROM emp</h3>
+                  <span id="query-step-metrics" class="metrics-pill">8 tuples in pipeline</span>
+                </div>
+                <div class="view-mode-toggle" role="group" aria-label="View format">
+                  <button type="button" class="view-toggle-btn active" id="btn-view-graphic" title="Visual Cards & Buckets View">
+                    🎨 Visual Flow
+                  </button>
+                  <button type="button" class="view-toggle-btn" id="btn-view-ascii" title="Raw Monospace Table View">
+                    ▦ ASCII Table
+                  </button>
+                </div>
+              </div>
+
+              <!-- Roadmap Flow Track -->
+              <div class="flow-track-wrapper">
+                <div id="query-flow-track" class="query-flow-track" role="tablist" aria-label="Physical Pipeline Flow"></div>
+              </div>
             </div>
 
-            <!-- Raw Monospace ASCII Table View (Toggleable) -->
-            <div id="query-ascii-canvas-wrapper" class="stage-canvas-wrapper hidden">
-              <pre id="query-step-table" class="terminal-canvas stage-canvas" aria-label="Monospace ASCII Table for Current Step"></pre>
+            <!-- Toggleable Dataset Panel -->
+            <div id="query-dataset-panel" class="query-dataset-panel hidden">
+              <div class="panel-header">
+                <span class="panel-label">CANONICAL BENCHMARK RELATION: 'EMP' (8 TUPLES)</span>
+                <button id="btn-close-dataset" class="action-btn btn-xs" type="button">✖ CLOSE</button>
+              </div>
+              <pre id="query-dataset-pre" class="terminal-canvas dataset-canvas"></pre>
             </div>
-          </div>
+
+            <!-- Scrollable Body with Visual Buckets and Cards -->
+            <div class="stage-body-scroll">
+              <div id="query-visual-canvas" class="query-visual-canvas" aria-label="Visual Interactive Pipeline Stage"></div>
+              
+              <!-- Raw Monospace ASCII Table View -->
+              <div id="query-ascii-canvas-wrapper" class="stage-canvas-wrapper hidden">
+                <pre id="query-step-table" class="terminal-canvas stage-canvas" aria-label="Monospace ASCII Table for Current Step"></pre>
+              </div>
+            </div>
+
+          </main>
 
         </div>
       </div>
