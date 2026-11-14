@@ -7,6 +7,7 @@
 
   // State
   let activeTabMode = "er";
+  let erDiagramStyle = "chen";
   let isRequestPending = false;
 
   // DOM Elements
@@ -22,6 +23,8 @@
   const statusIndicatorEl = document.getElementById("system-status");
   const diagramPanelEl = document.getElementById("panel-diagram");
   const queryPanelEl = document.getElementById("panel-query");
+  const erStyleToggleEl = document.getElementById("er-style-toggle");
+  const styleToggleBtns = document.querySelectorAll(".style-toggle-btn");
 
   function setStatus(text, isError = false) {
     if (statusIndicatorEl) {
@@ -85,8 +88,13 @@
     if (activeTabMode === "query") {
       diagramPanelEl.classList.add("hidden");
       queryPanelEl.classList.remove("hidden");
+      if (erStyleToggleEl) erStyleToggleEl.style.display = "none";
       outputTitleEl.textContent = "QUERY // CANONICAL PIPELINE EXECUTION";
+      if (charCountEl) charCountEl.textContent = "Pipeline Active // 8 Canonical Tuples";
       setStatus("READY");
+      if (window.SchemaFlowQueryVisualizer && window.SchemaFlowQueryVisualizer.init) {
+        window.SchemaFlowQueryVisualizer.init();
+      }
       return;
     }
 
@@ -101,13 +109,21 @@
     }
 
     let endpoint = "/api/er";
-    let titleText = "OUTPUT // ER DIAGRAM";
-    if (activeTabMode === "uml") {
-      endpoint = "/api/uml";
-      titleText = "OUTPUT // UML CLASS DIAGRAM";
-    } else if (activeTabMode === "describe") {
-      endpoint = "/api/describe";
-      titleText = "OUTPUT // SCREEN-READER NATURAL LANGUAGE";
+    let titleText = erDiagramStyle === "chen"
+      ? "OUTPUT // CHEN ER (RECTANGLES & DIAMONDS)"
+      : "OUTPUT // RELATIONAL SCHEMA (TABLE BOXES)";
+
+    if (activeTabMode === "er") {
+      if (erStyleToggleEl) erStyleToggleEl.style.display = "inline-flex";
+    } else {
+      if (erStyleToggleEl) erStyleToggleEl.style.display = "none";
+      if (activeTabMode === "uml") {
+        endpoint = "/api/uml";
+        titleText = "OUTPUT // UML CLASS DIAGRAM";
+      } else if (activeTabMode === "describe") {
+        endpoint = "/api/describe";
+        titleText = "OUTPUT // SCREEN-READER NATURAL LANGUAGE";
+      }
     }
     outputTitleEl.textContent = titleText;
 
@@ -119,7 +135,7 @@
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sql: sqlCode }),
+        body: JSON.stringify({ sql: sqlCode, style: erDiagramStyle }),
       });
 
       const data = await response.json();
@@ -199,6 +215,20 @@
   tabElements.forEach(function (btn) {
     btn.addEventListener("click", handleTabClick);
   });
+
+  if (styleToggleBtns) {
+    styleToggleBtns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const targetStyle = btn.getAttribute("data-style");
+        if (!targetStyle || targetStyle === erDiagramStyle) return;
+        erDiagramStyle = targetStyle;
+        styleToggleBtns.forEach(function (b) {
+          b.classList.toggle("active", b === btn);
+        });
+        executeCurrentTab();
+      });
+    });
+  }
 
   if (sampleSelectEl) {
     sampleSelectEl.addEventListener("change", function (e) {

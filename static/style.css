@@ -214,6 +214,47 @@ html, body {
   border-bottom: 1px solid var(--border-color);
 }
 
+.header-mode-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.er-style-toggle {
+  display: inline-flex;
+  gap: 2px;
+  background-color: var(--bg-primary);
+  padding: 2px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+}
+
+.style-toggle-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  padding: 3px 8px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border-radius: 1px;
+  transition: all 0.15s ease;
+}
+
+.style-toggle-btn:hover {
+  color: var(--text-main);
+  background-color: var(--bg-secondary);
+}
+
+.style-toggle-btn.active {
+  background-color: var(--bg-secondary);
+  color: var(--accent-cyan);
+  font-weight: bold;
+  border: 1px solid var(--border-focus);
+}
+
 .panel-label {
   font-size: 0.8rem;
   font-weight: 600;
@@ -310,23 +351,731 @@ html, body {
   text-shadow: var(--glow-subtle);
 }
 
+/* ==========================================================================
+   Query Execution Pipeline Visualizer (Tab 4)
+   ========================================================================== */
 .query-wrapper {
   flex: 1;
   padding: 16px;
-  overflow: auto;
+  overflow-y: auto;
   background-color: var(--bg-primary);
 }
 
-.query-placeholder-banner {
-  border: 1px dashed var(--border-color);
-  padding: 24px;
-  text-align: center;
+.query-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.query-control-card,
+.query-dataset-panel,
+.query-stepper-container,
+.query-stage-card {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.query-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.query-select {
+  flex: 1;
+  min-width: 250px;
+}
+
+.query-input-box {
+  padding: 10px 14px;
+}
+
+.query-sql-textarea {
+  width: 100%;
+  min-height: 60px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  resize: vertical;
+}
+
+.query-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px 12px;
+  gap: 12px;
+}
+
+.query-badge {
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  color: var(--accent-cyan);
+}
+
+/* Stepper Controls */
+.stepper-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stepper-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stepper-label {
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 1px;
   color: var(--text-muted);
 }
 
-.query-placeholder-banner h3 {
+.clause-pill {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  background-color: rgba(0, 240, 255, 0.1);
+  border: 1px solid var(--accent-cyan);
   color: var(--accent-cyan);
-  margin-bottom: 8px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.playback-controls {
+  display: flex;
+  gap: 6px;
+}
+
+/* SQL Clause Highlighter */
+.query-clause-highlighter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.highlighter-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.highlighted-sql-body {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sql-clause-chip {
+  padding: 2px 6px;
+  border-radius: 2px;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.sql-clause-chip.active-clause {
+  color: #fff;
+  background-color: rgba(0, 240, 255, 0.2);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+  font-weight: bold;
+}
+
+/* Visual Flow Track (Roadmap with Arrows) */
+.flow-track-wrapper {
+  padding: 12px 14px;
+  background-color: var(--bg-primary);
+  overflow-x: auto;
+}
+
+.query-flow-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flow-node {
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 8px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  transition: all 0.15s ease;
+  border-radius: 2px;
+  min-width: 100px;
+}
+
+.flow-node:hover {
+  color: var(--text-main);
+  border-color: var(--border-focus);
+}
+
+.flow-node.active {
+  background: var(--bg-panel);
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+  font-weight: bold;
+}
+
+.flow-node.passed {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+.flow-node-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+}
+
+.flow-node-status {
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
+}
+
+.flow-arrow {
+  color: var(--border-color);
+  font-size: 1.1rem;
+  user-select: none;
+}
+
+.flow-arrow.passed {
+  color: var(--accent-green);
+}
+
+/* Step Stage Card */
+.stage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.stage-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stage-pill {
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.stage-title {
+  font-size: 1.05rem;
+  color: var(--text-main);
+  margin: 0;
+  font-family: var(--font-mono);
+}
+
+.stage-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.metrics-pill {
+  font-size: 0.75rem;
+  color: var(--accent-green);
+  font-family: var(--font-mono);
+}
+
+.view-mode-toggle {
+  display: inline-flex;
+  gap: 2px;
+  background-color: var(--bg-primary);
+  padding: 2px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+}
+
+.view-toggle-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  padding: 3px 8px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+  border-radius: 1px;
+  transition: all 0.15s ease;
+}
+
+.view-toggle-btn:hover {
+  color: var(--text-main);
+}
+
+.view-toggle-btn.active {
+  background-color: var(--bg-secondary);
+  color: var(--accent-cyan);
+  font-weight: bold;
+  border: 1px solid var(--border-focus);
+}
+
+/* Reality Check: Written Order vs Engine Order Banner */
+.order-contrast-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 170, 0, 0.08);
+  border-bottom: 1px solid rgba(255, 170, 0, 0.25);
+  color: #ffaa00;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+}
+
+.contrast-icon {
+  font-size: 1rem;
+}
+
+.contrast-text {
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+/* Dual Plain-English Insights Grid */
+.dual-insights-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+@media (max-width: 768px) {
+  .dual-insights-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.insight-card {
+  padding: 12px 14px;
+  border-radius: 2px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+}
+
+.insight-card.what-card {
+  border-left: 3px solid var(--accent-cyan);
+}
+
+.insight-card.hood-card {
+  border-left: 3px solid #ffaa00;
+}
+
+.insight-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.insight-icon {
+  font-size: 1rem;
+}
+
+.insight-label {
+  font-size: 0.72rem;
+  font-weight: bold;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+}
+
+.what-card .insight-label {
+  color: var(--accent-cyan);
+}
+
+.hood-card .insight-label {
+  color: #ffaa00;
+}
+
+.insight-text {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--text-main);
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   Visual Pipeline Flow Canvas: Buckets, Cards & Stamped Partitions
+   ========================================================================== */
+.query-visual-canvas {
+  padding: 10px 16px 20px;
+}
+
+/* Employee Cards Grid (FROM & WHERE) */
+.visual-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.tuple-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  padding: 10px 14px;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.tuple-card.passed {
+  border-color: rgba(0, 255, 102, 0.4);
+}
+
+.tuple-card.dropped {
+  border-color: rgba(255, 68, 68, 0.4);
+  opacity: 0.45;
+  background-color: rgba(255, 68, 68, 0.03);
+}
+
+.tuple-card.dropped .tuple-name {
+  text-decoration: line-through;
+}
+
+.tuple-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.tuple-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tuple-name {
+  font-weight: bold;
+  font-size: 0.88rem;
+  color: var(--text-main);
+}
+
+.tuple-job-badge {
+  font-size: 0.68rem;
+  padding: 2px 6px;
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+}
+
+.tuple-dept-sal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.tuple-eval-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border-color);
+  font-size: 0.75rem;
+}
+
+.eval-calc {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.eval-badge {
+  font-weight: bold;
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.eval-badge.pass {
+  background-color: rgba(0, 255, 102, 0.15);
+  color: var(--accent-green);
+  border: 1px solid var(--accent-green);
+}
+
+.eval-badge.fail {
+  background-color: rgba(255, 68, 68, 0.15);
+  color: var(--accent-red);
+  border: 1px solid var(--accent-red);
+}
+
+/* ==========================================================================
+   Physical Department Buckets Grid (GROUP BY & HAVING)
+   ========================================================================== */
+.buckets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 16px;
+}
+
+.visual-bucket {
+  background-color: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.visual-bucket.bucket-active {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.visual-bucket.bucket-passed {
+  border-color: var(--accent-green);
+}
+
+.visual-bucket.bucket-dropped {
+  border-color: var(--accent-red);
+  opacity: 0.45;
+  background-color: rgba(255, 68, 68, 0.04);
+}
+
+.bucket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.bucket-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bucket-icon {
+  font-size: 1.1rem;
+}
+
+.bucket-title {
+  font-weight: bold;
+  font-size: 0.88rem;
+  color: var(--text-main);
+  letter-spacing: 0.5px;
+}
+
+.bucket-count-badge {
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  background: rgba(0, 240, 255, 0.12);
+  color: var(--accent-cyan);
+  border: 1px solid var(--accent-cyan);
+  font-weight: bold;
+}
+
+.bucket-members-list {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.bucket-member-chip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-secondary);
+  padding: 6px 10px;
+  border-radius: 2px;
+  font-size: 0.78rem;
+  border: 1px solid var(--border-color);
+}
+
+.member-name {
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.member-sal {
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+}
+
+/* HAVING Stamp Banner on Bucket */
+.bucket-stamp-bar {
+  padding: 8px 12px;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.bucket-stamp-badge {
+  font-weight: bold;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+
+.bucket-stamp-badge.approved {
+  background-color: rgba(0, 255, 102, 0.2);
+  color: var(--accent-green);
+  border: 1px solid var(--accent-green);
+}
+
+.bucket-stamp-badge.rejected {
+  background-color: rgba(255, 68, 68, 0.2);
+  color: var(--accent-red);
+  border: 1px solid var(--accent-red);
+}
+
+/* Materialized Results Grid (SELECT & ORDER BY) */
+.materialized-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.materialized-row-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.materialized-row-card:hover {
+  border-color: var(--accent-cyan);
+}
+
+.row-rank-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rank-badge {
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 3px 8px;
+  background: var(--bg-secondary);
+  color: var(--accent-cyan);
+  border: 1px solid var(--accent-cyan);
+  border-radius: 2px;
+}
+
+.row-key-title {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: var(--text-main);
+}
+
+.row-metrics-list {
+  display: flex;
+  gap: 18px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.metric-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.metric-value {
+  color: var(--accent-cyan);
+  font-weight: bold;
+}
+
+.stage-canvas-wrapper {
+  padding: 0 16px 16px;
+  overflow-x: auto;
+}
+
+.stage-canvas,
+.dataset-canvas {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  padding: 12px 16px;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--text-main);
+  overflow-x: auto;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+}
+
+.btn-xs {
+  padding: 2px 6px;
+  font-size: 0.7rem;
+}
+
+.hidden {
+  display: none !important;
 }
 
 .hidden {

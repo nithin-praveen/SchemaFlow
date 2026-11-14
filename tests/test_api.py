@@ -68,3 +68,51 @@ def test_api_syntax_error_handling():
     data = resp.get_json()
     assert "error" in data
     assert "Syntax error" in data["error"]
+
+
+def test_api_chen_endpoint():
+    client = app.test_client()
+    sql = "CREATE TABLE students (id INT PRIMARY KEY, name VARCHAR(50));"
+    resp = client.post("/api/chen", json={"sql": sql})
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert "students" in data["result"]
+    assert "[ RECTANGLE ]" in data["result"]
+    assert "( id* [PK] )" in data["result"]
+
+
+def test_api_er_styles():
+    client = app.test_client()
+    sql = "CREATE TABLE tbl (id INT PRIMARY KEY);"
+    
+    # Test chen style explicitly
+    resp_chen = client.post("/api/er", json={"sql": sql, "style": "chen"})
+    assert resp_chen.status_code == 200
+    assert "CHEN CONCEPTUAL" in resp_chen.get_json()["result"]
+
+    # Test relational style explicitly
+    resp_rel = client.post("/api/er", json={"sql": sql, "style": "relational"})
+    assert resp_rel.status_code == 200
+    assert "╔" in resp_rel.get_json()["result"]
+
+
+def test_api_query_pipeline_presets():
+    client = app.test_client()
+    resp = client.get("/api/query-pipeline/presets")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert "presets" in data
+    assert len(data["presets"]) >= 4
+    assert "dataset" in data
+    assert len(data["dataset"]) == 8
+
+
+def test_api_query_pipeline_simulate():
+    client = app.test_client()
+    sql = "SELECT emp_name, salary FROM emp WHERE salary >= 75000;"
+    resp = client.post("/api/query-pipeline/simulate", json={"sql": sql})
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data["final_row_count"] == 2
+    assert data["total_steps"] >= 3
+    assert len(data["steps"]) == data["total_steps"]

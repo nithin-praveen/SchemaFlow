@@ -15,6 +15,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 from core.parser import parse_sql, SchemaParseError
 from core.classifier import get_direct_relationships, get_many_to_many_relationships
+from core.chen_renderer import render_chen_diagram
 
 
 def run_demo():
@@ -93,6 +94,11 @@ def run_demo():
         print("\nIDENTIFIED MANY-TO-MANY (M:N) CONNECTIONS:")
         for r in m2m:
             print(f"  ★ {r.source_table} <──(M:N via {r.junction_table})──> {r.target_table}")
+
+    print("\n" + "=" * 70)
+    print("       GENERATING VISUAL PETER CHEN ER DIAGRAM (RECTANGLES & DIAMONDS)")
+    print("=" * 70 + "\n")
+    print(render_chen_diagram(schema))
 
     print("\n" + "=" * 70)
     print("Demo completed successfully. Zero AI/ML used: 100% deterministic parsing.")

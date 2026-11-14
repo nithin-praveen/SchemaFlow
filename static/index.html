@@ -70,7 +70,17 @@
     <!-- Right Panel: Diagram / Narrative View -->
     <section class="viewer-panel" aria-label="Diagram Output Canvas">
       <div class="panel-header">
-        <span class="panel-label" id="output-mode-title">OUTPUT // ER DIAGRAM</span>
+        <div class="header-mode-group">
+          <span class="panel-label" id="output-mode-title">OUTPUT // ER DIAGRAM</span>
+          <div class="er-style-toggle" id="er-style-toggle" role="group" aria-label="ER Diagram Style">
+            <button type="button" class="style-toggle-btn active" id="btn-style-chen" data-style="chen" title="Textbook Peter Chen ER: Rectangles for Entities & Diamonds for Relationships">
+              ◆ Chen ER (Diamonds)
+            </button>
+            <button type="button" class="style-toggle-btn" id="btn-style-relational" data-style="relational" title="Physical Relational Schema: Double-line Table Boxes with Columns">
+              ▦ Relational Tables
+            </button>
+          </div>
+        </div>
         <span class="char-count" id="char-count">0 lines</span>
       </div>
 
@@ -80,11 +90,136 @@
 
       <!-- Dedicated container for Tab 4 Query Visualizer -->
       <div class="query-wrapper hidden" id="panel-query" role="tabpanel" tabindex="0" aria-label="Interactive Query Execution Simulator">
-        <div id="query-visualiser-root">
-          <div class="query-placeholder-banner">
-            <h3>Query Visualizer Tab</h3>
-            <p>Interactive step-by-step query pipeline execution on the canonical 8-row emp dataset.</p>
+        <div id="query-visualiser-root" class="query-container">
+          
+          <!-- Top: Query Configuration & Input -->
+          <div class="query-control-card">
+            <div class="query-card-header">
+              <label for="query-preset-select" class="panel-label">CANONICAL PRESETS:</label>
+              <select id="query-preset-select" class="terminal-select query-select" aria-label="Select benchmark SELECT query">
+                <option value="">-- Choose SQL Query Preset --</option>
+              </select>
+              <button id="btn-toggle-dataset" class="action-btn btn-sm" type="button" title="Inspect the 8-row benchmark dataset">
+                📋 VIEW 'EMP' DATASET
+              </button>
+            </div>
+            
+            <div class="query-input-box">
+              <textarea
+                id="query-sql-input"
+                class="terminal-textarea query-sql-textarea"
+                spellcheck="false"
+                rows="2"
+                placeholder="-- Enter MySQL SELECT query on 'emp' table...&#10;SELECT dept, COUNT(*) FROM emp WHERE salary >= 45000 GROUP BY dept;"></textarea>
+            </div>
+
+            <div class="query-actions-bar">
+              <button id="btn-run-query" class="action-btn btn-primary" type="button">
+                ▶ RUN PIPELINE SIMULATION
+              </button>
+              <span id="query-status-badge" class="query-badge" role="status">READY</span>
+            </div>
           </div>
+
+          <!-- Dataset viewer panel (toggleable) -->
+          <div id="query-dataset-panel" class="query-dataset-panel hidden">
+            <div class="panel-header">
+              <span class="panel-label">CANONICAL BENCHMARK RELATION: 'EMP' (8 TUPLES)</span>
+              <button id="btn-close-dataset" class="action-btn btn-xs" type="button">✖ CLOSE</button>
+            </div>
+            <pre id="query-dataset-pre" class="terminal-canvas dataset-canvas"></pre>
+          </div>
+
+          <!-- Stepper Navigation Bar & Flow Track -->
+          <div id="query-stepper-container" class="query-stepper-container hidden">
+            <div class="stepper-header">
+              <div class="stepper-title-group">
+                <span class="stepper-label">PHYSICAL PIPELINE FLOW</span>
+                <span id="query-active-clause-badge" class="clause-pill">ACTIVE: FROM</span>
+              </div>
+              <div class="playback-controls">
+                <button id="btn-step-prev" class="action-btn btn-sm" type="button" title="Previous physical execution step">
+                  ◀ PREV
+                </button>
+                <button id="btn-step-play" class="action-btn btn-sm" type="button" title="Auto-advance through execution steps">
+                  ▶ AUTO-PLAY
+                </button>
+                <button id="btn-step-next" class="action-btn btn-sm" type="button" title="Next physical execution step">
+                  NEXT ▶
+                </button>
+              </div>
+            </div>
+
+            <!-- SQL Query Token Highlighter (shows what is executing) -->
+            <div class="query-clause-highlighter" id="query-clause-highlighter" aria-label="Original query with active clause highlighted">
+              <span class="highlighter-label">QUERY EXECUTION TRACE:</span>
+              <div id="query-highlighted-sql" class="highlighted-sql-body"></div>
+            </div>
+
+            <!-- Flow Track (Visual Roadmap with arrows) -->
+            <div class="flow-track-wrapper">
+              <div id="query-flow-track" class="query-flow-track" role="tablist" aria-label="Physical Pipeline Flow">
+                <!-- Dynamically populated connected flow nodes (FROM -> WHERE -> GROUP BY -> ...) -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Step Display Stage -->
+          <div id="query-stage-card" class="query-stage-card hidden">
+            <div class="stage-header">
+              <div class="stage-title-wrap">
+                <span id="query-step-number-badge" class="stage-pill">STEP 1 OF 6</span>
+                <h3 id="query-step-title" class="stage-title">Step 1: FROM emp</h3>
+              </div>
+              <div class="stage-controls-right">
+                <span id="query-step-metrics" class="metrics-pill">8 tuples in pipeline</span>
+                <div class="view-mode-toggle" role="group" aria-label="View format">
+                  <button type="button" class="view-toggle-btn active" id="btn-view-graphic" title="Visual Cards & Buckets View">
+                    🎨 Visual Flow
+                  </button>
+                  <button type="button" class="view-toggle-btn" id="btn-view-ascii" title="Raw Monospace Table View">
+                    ▦ ASCII Table
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reality Check: Written Order vs Engine Order -->
+            <div class="order-contrast-banner" id="order-contrast-banner">
+              <span class="contrast-icon">⚡</span>
+              <span id="query-written-vs-phys" class="contrast-text">Written in SQL at position #2 ──► Executes FIRST under the hood</span>
+            </div>
+
+            <!-- Dual Simple Explanations (What is happening + Under the hood secret) -->
+            <div class="dual-insights-grid">
+              <div class="insight-card what-card">
+                <div class="insight-header">
+                  <span class="insight-icon">🎯</span>
+                  <span class="insight-label">WHAT IS HAPPENING:</span>
+                </div>
+                <p id="query-step-what-text" class="insight-text">The database locates the table on disk and pulls all rows into memory.</p>
+              </div>
+
+              <div class="insight-card hood-card">
+                <div class="insight-header">
+                  <span class="insight-icon">🔍</span>
+                  <span class="insight-label">UNDER THE HOOD SECRET:</span>
+                </div>
+                <p id="query-step-hood-text" class="insight-text">Even though SELECT is written first, SQL engines always start with FROM.</p>
+              </div>
+            </div>
+
+            <!-- Visual Flow Graphic Container (Buckets, Cards, Stamped Partitions) -->
+            <div id="query-visual-canvas" class="query-visual-canvas" aria-label="Visual Interactive Pipeline Stage">
+              <!-- Dynamically populated visual buckets/cards -->
+            </div>
+
+            <!-- Raw Monospace ASCII Table View (Toggleable) -->
+            <div id="query-ascii-canvas-wrapper" class="stage-canvas-wrapper hidden">
+              <pre id="query-step-table" class="terminal-canvas stage-canvas" aria-label="Monospace ASCII Table for Current Step"></pre>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -99,6 +234,7 @@
     </div>
   </footer>
 
+  <script src="js/query_visualiser.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
