@@ -233,3 +233,4 @@ Select any public service schema (e.g. `4` for `school.sql`), and SchemaFlow wil
 
 ## 📄 License
 This project is open-source and available under the [MIT License](LICENSE).
+
