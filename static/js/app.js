@@ -27,6 +27,10 @@
   const editorPanelEl = document.querySelector(".editor-panel");
   const erStyleToggleEl = document.getElementById("er-style-toggle");
   const styleToggleBtns = document.querySelectorAll(".style-toggle-btn");
+  const uploadBtnEl = document.getElementById("btn-upload-sql");
+  const sqlFileInputEl = document.getElementById("sql-file-input");
+  const editorWrapperEl = document.getElementById("editor-wrapper");
+  const editorDropzoneEl = document.getElementById("editor-dropzone");
 
   function setStatus(text, isError = false) {
     if (statusIndicatorEl) {
@@ -217,6 +221,41 @@
     URL.revokeObjectURL(downloadUrl);
   }
 
+  function handleFileUpload(file) {
+    if (!file) return;
+
+    // Check extension
+    const isSqlExt = /\.(sql|ddl|txt)$/i.test(file.name);
+    if (!isSqlExt && file.type && !file.type.startsWith("text/")) {
+      setStatus("WARN: PLEASE SELECT A .SQL OR .TXT FILE", true);
+    }
+
+    setStatus(`READING ${file.name.toUpperCase()}...`);
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const content = e.target.result;
+      if (!content || !content.trim()) {
+        setStatus(`WARN: ${file.name} IS EMPTY`, true);
+        return;
+      }
+
+      sqlInputEl.value = content;
+      if (sampleSelectEl) sampleSelectEl.value = "";
+      const lineCount = content.split("\n").length;
+      setStatus(`LOADED: ${file.name} (${lineCount} lines)`);
+
+      // Automatically generate diagram for instant visual feedback
+      executeCurrentTab();
+    };
+
+    reader.onerror = function () {
+      setStatus(`ERROR READING ${file.name}`, true);
+    };
+
+    reader.readAsText(file, "UTF-8");
+  }
+
   // Event Listeners
   tabElements.forEach(function (btn) {
     btn.addEventListener("click", handleTabClick);
@@ -254,6 +293,62 @@
 
   if (downloadBtnEl) {
     downloadBtnEl.addEventListener("click", handleDownload);
+  }
+
+  // File Upload & Drag-and-Drop
+  if (uploadBtnEl && sqlFileInputEl) {
+    uploadBtnEl.addEventListener("click", function () {
+      sqlFileInputEl.click();
+    });
+
+    sqlFileInputEl.addEventListener("change", function (e) {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        handleFileUpload(file);
+      }
+      sqlFileInputEl.value = "";
+    });
+  }
+
+  if (editorWrapperEl) {
+    let dragCounter = 0;
+
+    editorWrapperEl.addEventListener("dragenter", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter++;
+      if (editorDropzoneEl) editorDropzoneEl.classList.remove("hidden");
+    });
+
+    editorWrapperEl.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = "copy";
+      }
+    });
+
+    editorWrapperEl.addEventListener("dragleave", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter--;
+      if (dragCounter <= 0) {
+        dragCounter = 0;
+        if (editorDropzoneEl) editorDropzoneEl.classList.add("hidden");
+      }
+    });
+
+    editorWrapperEl.addEventListener("drop", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter = 0;
+      if (editorDropzoneEl) editorDropzoneEl.classList.add("hidden");
+
+      const dt = e.dataTransfer;
+      if (dt && dt.files && dt.files.length > 0) {
+        handleFileUpload(dt.files[0]);
+      }
+    });
   }
 
   // Initialize

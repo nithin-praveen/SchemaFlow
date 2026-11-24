@@ -39,19 +39,33 @@
     <!-- Left Panel: SQL Input & Controls -->
     <section class="editor-panel" aria-label="SQL Schema Input">
       <div class="panel-header">
-        <label for="sample-select" class="panel-label">SAMPLE SCHEMAS:</label>
-        <select id="sample-select" class="terminal-select" aria-label="Select sample schema">
-          <option value="">-- Choose Public Service Schema --</option>
-        </select>
+        <div class="header-mode-group">
+          <label for="sample-select" class="panel-label">SAMPLE SCHEMAS:</label>
+          <select id="sample-select" class="terminal-select" aria-label="Select sample schema">
+            <option value="">-- Choose Public Service Schema --</option>
+          </select>
+        </div>
+        <div class="header-action-group">
+          <button id="btn-upload-sql" class="action-btn btn-sm" type="button" title="Upload a .sql or .ddl file from your computer">
+            📁 UPLOAD .SQL
+          </button>
+          <input type="file" id="sql-file-input" accept=".sql,.ddl,.txt" style="display: none;" aria-label="Upload SQL File">
+        </div>
       </div>
 
-      <div class="editor-wrapper">
+      <div class="editor-wrapper" id="editor-wrapper">
         <label for="sql-input" class="sr-only">MySQL CREATE TABLE Script</label>
         <textarea
           id="sql-input"
           class="terminal-textarea"
           spellcheck="false"
-          placeholder="-- Paste MySQL CREATE TABLE / ALTER statements here...&#10;&#10;CREATE TABLE users (&#10;    id INT PRIMARY KEY,&#10;    email VARCHAR(100) UNIQUE&#10;);"></textarea>
+          placeholder="-- Paste MySQL CREATE TABLE / ALTER statements here, or drop a .sql file...&#10;&#10;CREATE TABLE users (&#10;    id INT PRIMARY KEY,&#10;    email VARCHAR(100) UNIQUE&#10;);"></textarea>
+        <div id="editor-dropzone" class="editor-dropzone hidden" aria-hidden="true">
+          <div class="dropzone-content">
+            <span class="dropzone-icon">📥</span>
+            <span class="dropzone-text">DROP .SQL FILE TO LOAD &amp; VISUALIZE</span>
+          </div>
+        </div>
       </div>
 
       <div class="action-bar">
