@@ -306,6 +306,47 @@ html, body {
   box-shadow: 0 0 8px rgba(0, 240, 255, 0.25);
 }
 
+/* Voice & Audio Accessibility Controls */
+.btn-recording-pulse {
+  background-color: #4a1515 !important;
+  color: #ff5555 !important;
+  border-color: #ff5555 !important;
+  box-shadow: 0 0 10px rgba(255, 85, 85, 0.6) !important;
+  animation: pulse-red 1.2s infinite ease-in-out;
+}
+
+@keyframes pulse-red {
+  0% {
+    box-shadow: 0 0 4px rgba(255, 85, 85, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(255, 85, 85, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 4px rgba(255, 85, 85, 0.4);
+  }
+}
+
+.btn-speaking {
+  background-color: #16382b !important;
+  color: var(--accent-green) !important;
+  border-color: var(--accent-green) !important;
+  box-shadow: 0 0 10px rgba(0, 255, 159, 0.5) !important;
+  animation: pulse-green 1.4s infinite ease-in-out;
+}
+
+@keyframes pulse-green {
+  0% {
+    box-shadow: 0 0 4px rgba(0, 255, 159, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(0, 255, 159, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 4px rgba(0, 255, 159, 0.3);
+  }
+}
+
 /* Drag-and-Drop Overlay */
 .editor-dropzone {
   position: absolute;

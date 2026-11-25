@@ -31,6 +31,8 @@
   const sqlFileInputEl = document.getElementById("sql-file-input");
   const editorWrapperEl = document.getElementById("editor-wrapper");
   const editorDropzoneEl = document.getElementById("editor-dropzone");
+  const dictateBtnEl = document.getElementById("btn-dictate-sql");
+  const speakBtnEl = document.getElementById("btn-speak-narrative");
 
   function setStatus(text, isError = false) {
     if (statusIndicatorEl) {
@@ -125,14 +127,17 @@
 
     if (activeTabMode === "er") {
       if (erStyleToggleEl) erStyleToggleEl.style.display = "inline-flex";
+      if (speakBtnEl) speakBtnEl.style.display = "none";
     } else {
       if (erStyleToggleEl) erStyleToggleEl.style.display = "none";
       if (activeTabMode === "uml") {
         endpoint = "/api/uml";
         titleText = "OUTPUT // UML CLASS DIAGRAM";
+        if (speakBtnEl) speakBtnEl.style.display = "none";
       } else if (activeTabMode === "describe") {
         endpoint = "/api/describe";
         titleText = "OUTPUT // SCREEN-READER NATURAL LANGUAGE";
+        if (speakBtnEl) speakBtnEl.style.display = "inline-flex";
       }
     }
     outputTitleEl.textContent = titleText;
@@ -169,6 +174,10 @@
     const clickedBtn = evt.currentTarget;
     const targetMode = clickedBtn.getAttribute("data-target");
     if (!targetMode) return;
+
+    // Stop active audio or dictation on tab switch
+    stopSpeaking();
+    stopListening();
 
     activeTabMode = targetMode;
     tabElements.forEach(function (btn) {
@@ -254,6 +263,204 @@
     };
 
     reader.readAsText(file, "UTF-8");
+  }
+
+  // ==========================================================================
+  // Two-Way Voice Accessibility (Speech Synthesis & Speech Recognition)
+  // ==========================================================================
+  let isSpeaking = false;
+  const synth = window.speechSynthesis;
+
+  function stopSpeaking() {
+    if (synth && isSpeaking) {
+      synth.cancel();
+      isSpeaking = false;
+      updateSpeakButton(false);
+    }
+  }
+
+  function speakNarrative() {
+    if (!synth) {
+      setStatus("SPEECH SYNTHESIS NOT SUPPORTED IN THIS BROWSER", true);
+      return;
+    }
+
+    if (isSpeaking) {
+      stopSpeaking();
+      setStatus("AUDIO NARRATION PAUSED");
+      return;
+    }
+
+    const text = outputPreEl ? outputPreEl.textContent : "";
+    if (!text || text.startsWith("Loading") || text.startsWith("Connection error")) {
+      setStatus("NO NARRATIVE TO READ ALOUD", true);
+      return;
+    }
+
+    synth.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    const voices = synth.getVoices();
+    const preferredVoice = voices.find(function (v) {
+      return (
+        v.lang &&
+        v.lang.startsWith("en") &&
+        (v.name.includes("Natural") ||
+          v.name.includes("Google") ||
+          v.name.includes("David") ||
+          v.name.includes("Zira"))
+      );
+    });
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+
+    utterance.onstart = function () {
+      isSpeaking = true;
+      updateSpeakButton(true);
+      setStatus("🔊 READING SCHEMA ALOUD...");
+    };
+
+    utterance.onend = function () {
+      isSpeaking = false;
+      updateSpeakButton(false);
+      setStatus("AUDIO NARRATION COMPLETE");
+    };
+
+    utterance.onerror = function (e) {
+      console.warn("Speech synthesis error:", e);
+      isSpeaking = false;
+      updateSpeakButton(false);
+      setStatus("AUDIO PLAYBACK STOPPED", true);
+    };
+
+    synth.speak(utterance);
+  }
+
+  function updateSpeakButton(speaking) {
+    if (!speakBtnEl) return;
+    if (speaking) {
+      speakBtnEl.textContent = "⏹ STOP AUDIO";
+      speakBtnEl.classList.add("btn-speaking");
+    } else {
+      speakBtnEl.textContent = "🔊 READ ALOUD";
+      speakBtnEl.classList.remove("btn-speaking");
+    }
+  }
+
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let isListening = false;
+  let preDictationSql = "";
+
+  function stopListening() {
+    if (recognition && isListening) {
+      try {
+        recognition.stop();
+      } catch (err) {}
+    }
+    isListening = false;
+    updateDictateButton(false);
+  }
+
+  function initSpeechRecognition() {
+    if (!SpeechRecognition) return null;
+    const rec = new SpeechRecognition();
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.lang = "en-US";
+
+    rec.onstart = function () {
+      isListening = true;
+      updateDictateButton(true);
+      setStatus("🎙️ LISTENING... SPEAK SQL COMMANDS");
+      preDictationSql = sqlInputEl.value;
+      if (preDictationSql && !preDictationSql.endsWith("\n")) {
+        preDictationSql += "\n";
+      }
+    };
+
+    rec.onresult = function (event) {
+      let speechText = "";
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        speechText += event.results[i][0].transcript;
+      }
+
+      // Automatically format spoken SQL syntax to standard DBMS casing
+      let formatted = speechText
+        .replace(/\bcreate table\b/gi, "CREATE TABLE")
+        .replace(/\bprimary key\b/gi, "PRIMARY KEY")
+        .replace(/\bforeign key\b/gi, "FOREIGN KEY")
+        .replace(/\breferences\b/gi, "REFERENCES")
+        .replace(/\bint\b|\binteger\b/gi, "INT")
+        .replace(/\bvarchar\b/gi, "VARCHAR")
+        .replace(/\bunique\b/gi, "UNIQUE")
+        .replace(/\bnot null\b/gi, "NOT NULL")
+        .replace(/\bnull\b/gi, "NULL")
+        .replace(/\bselect\b/gi, "SELECT")
+        .replace(/\bfrom\b/gi, "FROM")
+        .replace(/\bwhere\b/gi, "WHERE")
+        .replace(/\bsemicolon\b/gi, ";\n")
+        .replace(/\bcomma\b/gi, ",")
+        .replace(/\bopen bracket\b|\bopen parenthesis\b/gi, "(")
+        .replace(/\bclose bracket\b|\bclose parenthesis\b/gi, ")");
+
+      sqlInputEl.value = preDictationSql + formatted;
+    };
+
+    rec.onerror = function (event) {
+      console.warn("Speech recognition error:", event.error);
+      if (event.error !== "no-speech") {
+        setStatus(`MIC ERROR: ${event.error.toUpperCase()}`, true);
+      }
+      stopListening();
+    };
+
+    rec.onend = function () {
+      isListening = false;
+      updateDictateButton(false);
+      setStatus("DICTATION COMPLETE // READY");
+    };
+
+    return rec;
+  }
+
+  function toggleDictate() {
+    if (!SpeechRecognition) {
+      setStatus("SPEECH RECOGNITION NOT SUPPORTED (PLEASE USE CHROME OR EDGE)", true);
+      return;
+    }
+
+    if (isListening) {
+      stopListening();
+      setStatus("DICTATION STOPPED");
+      return;
+    }
+
+    if (!recognition) {
+      recognition = initSpeechRecognition();
+    }
+
+    try {
+      recognition.start();
+    } catch (e) {
+      recognition = initSpeechRecognition();
+      if (recognition) recognition.start();
+    }
+  }
+
+  function updateDictateButton(listening) {
+    if (!dictateBtnEl) return;
+    if (listening) {
+      dictateBtnEl.textContent = "🔴 LISTENING...";
+      dictateBtnEl.classList.add("btn-recording-pulse");
+    } else {
+      dictateBtnEl.textContent = "🎙️ DICTATE";
+      dictateBtnEl.classList.remove("btn-recording-pulse");
+    }
   }
 
   // Event Listeners
@@ -349,6 +556,15 @@
         handleFileUpload(dt.files[0]);
       }
     });
+  }
+
+  // Voice Accessibility Event Listeners
+  if (dictateBtnEl) {
+    dictateBtnEl.addEventListener("click", toggleDictate);
+  }
+
+  if (speakBtnEl) {
+    speakBtnEl.addEventListener("click", speakNarrative);
   }
 
   // Initialize
